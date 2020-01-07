@@ -1,7 +1,8 @@
+import { observable } from "mobx"
 
 export default class Store {
 
-  contacts = {}
+  @observable contacts = {}
 
   constructor() {
     // load all the contacts
@@ -12,14 +13,25 @@ export default class Store {
     this.load_contacts()
   }
 
-  update_contact(rest, id) {
+  new_contact(rest) {
     // using number ids for now, swap to uuid ASAP
     // if no ID, create one
-    if (isNaN(id)) {
-      id = this.get_new_id()
-      rest.id = id
-    }
+    const id = this.get_new_id()
+    rest.id = id
     this.contacts[id] = rest // TODO rest should be a Contact class
+    this.save_contacts()
+  }
+
+  update_contact(id, property, value) {
+    if (!id)
+      return
+
+    const contact = this.contacts[id]
+
+    if (!contact)
+      return
+
+    contact[property] = value
     this.save_contacts()
   }
 
@@ -31,7 +43,6 @@ export default class Store {
   }
 
   reset() {
-    console.log('here')
     window.localStorage.setItem('_pcrm_contacts', "{}")
     this.load_contacts()
   }
